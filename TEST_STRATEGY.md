@@ -1,4 +1,4 @@
-# TEST_PLAN.md — Freelance Tracker QA MVP
+# TEST_STRATEGY.md — Freelance Tracker QA MVP
 
 **Version:** 1.0
 **Author:** QA Engineer
