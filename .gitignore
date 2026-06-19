@@ -1,0 +1,9 @@
+# Dependency directories
+node_modules/
+
+# Cypress test artifacts and assets
+cypress/screenshots/
+cypress/videos/
+
+# Local environment variables and sensitive credentials
+.env
