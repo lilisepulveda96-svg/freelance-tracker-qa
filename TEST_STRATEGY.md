@@ -1,6 +1,6 @@
 # TEST_STRATEGY.md — Freelance Tracker QA MVP
 
-**Version:** 1.0
+**Version:** 1.1
 **Author:** QA Engineer
 **Date:** June 2025
 **Status:** Active
@@ -46,11 +46,10 @@ The goal of this QA MVP is to demonstrate a professional testing strategy applyi
 
 ### Dedicated Test Account Baseline
 
-| Field               | Value                                            | Purpose                         |
-| ------------------- | ------------------------------------------------ | ------------------------------- |
-| **Email**           | `qa.tester@freelancetracker.com`                 | Primary test account session    |
-| **Password**        | _Managed via System Environment/Secrets_         | Secure authentication key       |
-| **Pre-loaded Data** | Sample clients, projects, and historic time logs | Used as immutable baseline data |
+| Field           | Value                             | Purpose                                                                                                              |
+| --------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **QA Account**  | `qa.tester@freelancetracker.com`  | Used exclusively by automated tests (Cypress, Postman). Never used for manual exploration.                           |
+| **Dev Account** | `dev.tester@freelancetracker.com` | Used for manual local development and exploratory testing, to avoid mixing manual activity with automated test data. |
 
 ---
 
@@ -58,17 +57,17 @@ The goal of this QA MVP is to demonstrate a professional testing strategy applyi
 
 ### In scope
 
-| Module       | Functionality                                                           | Test type                                  |
-| ------------ | ----------------------------------------------------------------------- | ------------------------------------------ |
-| Auth         | Login (valid/invalid credentials), logout, route protection             | E2E                                        |
-| Auth         | Handling of unauthorized API responses (401)                            | E2E (simulated via `cy.intercept()`)       |
-| Customers    | Create, read, update, delete                                            | E2E                                        |
-| Projects     | Create, read, update, delete, customer association via `ReferenceInput` | E2E                                        |
-| Time Tracker | Stopwatch (start/pause/resume/stop), localStorage persistence           | E2E                                        |
-| Time Tracker | Time log appears in the time logs list after stopping                   | E2E (verified via UI, not direct DB query) |
-| Dashboard    | KPIs render with numeric values, chart renders                          | E2E                                        |
-| Performance  | API response time under concurrent load                                 | JMeter                                     |
-| API Contract | Status codes, response schema, headers per endpoint                     | Postman                                    |
+| Module       | Functionality                                                           | Test type                            |
+| ------------ | ----------------------------------------------------------------------- | ------------------------------------ |
+| Auth         | Login (valid/invalid credentials), logout, route protection             | E2E                                  |
+| Auth         | Handling of unauthorized API responses (401)                            | E2E (simulated via `cy.intercept()`) |
+| Customers    | Create, read, update, delete                                            | E2E                                  |
+| Projects     | Create, read, update, delete, customer association via `ReferenceInput` | E2E                                  |
+| Time Tracker | Stopwatch (start/pause/resume/stop), localStorage persistence           | E2E                                  |
+| Time Tracker | Time log saving — reflected via Dashboard "Total Hours" KPI             | Manual (documented, not automated)   |
+| Dashboard    | KPIs render with numeric values, chart renders                          | E2E                                  |
+| Performance  | API response time under concurrent load                                 | JMeter                               |
+| API Contract | Status codes, response schema, headers per endpoint                     | Postman                              |
 
 ### Out of scope (explicitly)
 
@@ -123,7 +122,7 @@ Since modifying the application source to inject custom data-attributes is out o
 1. **Semantic React Admin Form Attributes:** Properties auto-generated from the model's `source` element (e.g., `input[name="username"]`, `input[name="password"]`, `button[type="submit"]`).
 2. **Accessible ARIA Attributes:** Global semantic nodes like `[aria-label="..."]`.
 3. **Stable Component Classes:** Reliable framework layouts (e.g., `.RaLoginForm-input`) utilized only when semantic tags are completely absent.
-4. **Text-Based Querying:** Targeted use of `cy.contains()` on visible interactive fields as a final fallback layer.
+4. **Text-Based Querying:** Targeted use of `cy.contains()` on visible interactive fields as a final fallback layer. This is the primary strategy for the Time Tracker's control buttons (Start/Pause/Resume/Stop), which share an identical `type="button"` attribute with no further disambiguation available.
 
 ### 5.2 API Contract — Postman + Newman
 
@@ -141,7 +140,7 @@ Since modifying the application source to inject custom data-attributes is out o
 **Target:** Staging backend (Railway) — never Production
 **Report:** HTML generated in `tests/jmeter/reports/`
 
-**Methodology:** Thresholds below are **provisional** until a real baseline is captured. The first JMeter run (QA-401) measures actual response times under light load; thresholds are then recalibrated from that baseline rather than assumed in advance. This reflects how performance testing actually works — you measure first, then set realistic targets, not the other way around.
+**Methodology:** Thresholds below are **provisional** until a real baseline is captured. The first JMeter run (QA-601) measures actual response times under light load; thresholds are then recalibrated from that baseline rather than assumed in advance. This reflects how performance testing actually works — you measure first, then set realistic targets, not the other way around.
 
 ---
 
@@ -169,7 +168,8 @@ Since modifying the application source to inject custom data-attributes is out o
 ### Principles
 
 1. The test account is pre-loaded with sample data (clients, projects, time logs) used as a stable baseline
-2. **Every test that creates a record must delete it before the test or describe block ends** — this is non-negotiable since Staging shares its database with Local, where a developer may be working at any time
+2. **Every test that creates a record must delete it before the test or describe block ends** — this is non-negotiable for Customers, Projects, and any other deletable resource.
+   - **Exception:** Time logs cannot be deleted via the UI. The one test that exercises this flow (QA-402) is therefore excluded from automated CI execution and run manually and deliberately — see Section 5.1 of `QA_BACKLOG.md` for the full rationale.
 3. Never hardcode Supabase UUIDs — query or capture them dynamically at runtime
 4. Tests must be safe to run repeatedly without manual cleanup between runs
 
@@ -310,17 +310,19 @@ describe('[e2e] Customers')
 
 ## 11. Risks and mitigations
 
-| Risk Identified                                                                                            | Likelihood | Impact | Practical Mitigation Strategy                                                                                                   |
-| :--------------------------------------------------------------------------------------------------------- | :--------: | :----: | :------------------------------------------------------------------------------------------------------------------------------ |
-| **Data Pollution:** Multi-tenant test writes may damage or modify the shared developer database.           |    High    |  High  | Enforce strict create-and-delete validation cycles inside every writing spec hook.                                              |
-| **Flaky Stopwatch Assertions:** Native timer ticking can break E2E assertions in headless cloud execution. |    High    | Medium | Use Cypress control utilities (`cy.clock()` / `cy.tick()`) to completely bypass actual system wait times.                       |
-| **Brittle MUI Selectors:** Downstream Material UI layout changes could break brittle class mappings.       |   Medium   | Medium | Prioritize framework-native semantic HTML attributes (`name="username"`, `name="password"`) over visual CSS structural classes. |
-| **Changing Preview Domains:** Vercel branch builds continuously assign new unique host URLs.               |    Low     | Medium | Bind environments dynamically using a dedicated branch-pinned URL or inject via configuration variables.                        |
+| Risk Identified                                                                                                                              | Likelihood | Impact | Practical Mitigation Strategy                                                                                                   |
+| :------------------------------------------------------------------------------------------------------------------------------------------- | :--------: | :----: | :------------------------------------------------------------------------------------------------------------------------------ |
+| **Data Pollution:** Multi-tenant test writes may damage or modify the shared developer database.                                             |    High    |  High  | Enforce strict create-and-delete validation cycles inside every writing spec hook.                                              |
+| **Flaky Stopwatch Assertions:** Native timer ticking can break E2E assertions in headless cloud execution.                                   |    High    | Medium | Use Cypress control utilities (`cy.clock()` / `cy.tick()`) to completely bypass actual system wait times.                       |
+| **Brittle MUI Selectors:** Downstream Material UI layout changes could break brittle class mappings.                                         |   Medium   | Medium | Prioritize framework-native semantic HTML attributes (`name="username"`, `name="password"`) over visual CSS structural classes. |
+| **Changing Preview Domains:** Vercel branch builds continuously assign new unique host URLs.                                                 |    Low     | Medium | Bind environments dynamically using a dedicated branch-pinned URL or inject via configuration variables.                        |
+| **Unbounded KPI Growth:** The "Total Hours" KPI increases permanently with every run of the time-tracking flow, with no UI path to reset it. |    Low     | Medium | Excluded from CI; run manually and infrequently by deliberate design.                                                           |
 
 ---
 
 ## 12. Changelog
 
-| Version | Date      | Change                                                                                                                                                                                              |
-| ------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.0     | June 2025 | Local and Staging share one database, Production is fully isolated; all automated tests (E2E, Postman, JMeter) target Staging, with Postman also running read-only smoke checks against Production. |
+| Version | Date      | Change                                                                                                                                                                                                                                                                               |
+| ------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1.0     | June 2025 | Local and Staging share one database, Production is fully isolated; all automated tests (E2E, Postman, JMeter) target Staging, with Postman also running read-only smoke checks against Production.                                                                                  |
+| 1.1     | June 2025 | Added dedicated `dev.tester` account to avoid mixing manual exploration with automated test data; reclassified time log verification as a deliberate manual test, excluded from CI, due to no UI deletion path and unbounded KPI growth; corrected JMeter ticket reference to QA-601 |
