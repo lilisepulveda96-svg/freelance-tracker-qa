@@ -43,12 +43,12 @@ The application does not implement `data-testid` attributes, and adding them is 
 
 ## Customers — Create/Edit form
 
-| Element                       | Selector found                      | Type | Notes                                         |
-| ----------------------------- | ----------------------------------- | :--: | --------------------------------------------- |
-| Name input                    | `input[name="name"]`                |  1   | Native model attribute mapping. Ultra-stable. |
-| Email input                   | `input[name="email"]`               |  1   | Native model attribute mapping. Ultra-stable. |
-| Save button                   | `button[type="submit"]`             |  1   | Standard form submission control.             |
-| Validation error (empty name) | `.MuiFormHelperText-root.Mui-error` |  3   | Stable Material UI error class combination.   |
+| Element       | Selector found          | Type | Notes                                         |
+| ------------- | ----------------------- | :--: | --------------------------------------------- |
+| Name input    | `input[name="name"]`    |  1   | Native model attribute mapping. Ultra-stable. |
+| Email input   | `input[name="email"]`   |  1   | Native model attribute mapping. Ultra-stable. |
+| Save button   | `button[type="submit"]` |  1   | Standard form submission control.             |
+| Alert message | `div[role='alert']`     |  2   | Accessible ARIA element.                      |
 
 ---
 
