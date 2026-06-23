@@ -54,3 +54,7 @@ Cypress.Commands.add("clearAppSession", () => {
     win.sessionStorage.clear();
   });
 });
+
+Cypress.Commands.add("assertMessageVisible", (selector, expectedText) => {
+  cy.get(selector).should("be.visible").and("contain", expectedText);
+});

@@ -38,10 +38,8 @@ class LoginPage {
     return this;
   }
 
-  assertErrorMessageVisible(expectedText) {
-    cy.get(this.#errorMessage)
-      .should("be.visible")
-      .and("contain.text", expectedText);
+  assertMessageVisible(expectedText) {
+    cy.assertMessageVisible(this.#errorMessage, expectedText);
     return this;
   }
 }
