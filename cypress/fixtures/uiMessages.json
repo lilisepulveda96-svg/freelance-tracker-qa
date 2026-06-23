@@ -1,0 +1,7 @@
+{
+  "invalidCredentials": "Invalid login credentials",
+  "formValidation": "The form is not valid. Please check for errors",
+  "elementCreated": "Element created",
+  "elementUpdated": "Element updated",
+  "elementDeleted": "Element deleted"
+}
