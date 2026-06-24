@@ -13,5 +13,6 @@ module.exports = defineConfig({
     TEST_USER_PASSWORD: process.env.CYPRESS_TEST_USER_PASSWORD,
     SUPABASE_URL: process.env.CYPRESS_SUPABASE_URL,
     SUPABASE_ANON_KEY: process.env.CYPRESS_SUPABASE_ANON_KEY,
+    API_URL: process.env.CYPRESS_API_URL,
   },
 });
