@@ -58,3 +58,21 @@ Cypress.Commands.add("clearAppSession", () => {
 Cypress.Commands.add("assertMessageVisible", (selector, expectedText) => {
   cy.get(selector).should("be.visible").and("contain", expectedText);
 });
+
+Cypress.Commands.add("apiRequest", (method, path, body) => {
+  return cy.window().then((win) => {
+    const projectRef = Cypress.env("SUPABASE_URL").match(
+      /https:\/\/(.+)\.supabase\.co/,
+    )[1];
+    const session = JSON.parse(
+      win.localStorage.getItem(`sb-${projectRef}-auth-token`),
+    );
+
+    return cy.request({
+      method,
+      url: `${Cypress.env("API_URL")}/${path}`,
+      headers: { Authorization: `Bearer ${session.access_token}` },
+      body,
+    });
+  });
+});
