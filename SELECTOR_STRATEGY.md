@@ -66,12 +66,13 @@ The application does not implement `data-testid` attributes, and adding them is 
 
 ## Projects — Create/Edit form
 
-| Element                            | Selector found                    | Type | Notes                                                       |
-| ---------------------------------- | --------------------------------- | :--: | ----------------------------------------------------------- |
-| Name input                         | `input[name="name"]`              |  1   | Native form field. Very stable.                             |
-| Customer `ReferenceInput` selector | `.MuiSelect-select`               |  3   | Click to open the dropdown menu.                            |
-| Customer dropdown options          | `.MuiMenu-root .MuiMenuItem-root` |  3   | Limits search to the open dropdown, avoiding sidebar links. |
-| Save button                        | `button[type="submit"]`           |  1   | Standard form submit button.                                |
+| Element                            | Selector found                                     | Type | Notes                                                       |
+| ---------------------------------- | -------------------------------------------------- | :--: | ----------------------------------------------------------- |
+| Name input                         | `input[name="name"]`                               |  1   | Native form field. Very stable.                             |
+| Customer `ReferenceInput` selector | `.MuiSelect-select`                                |  3   | Click to open the dropdown menu.                            |
+| Customer dropdown options          | `.MuiMenu-root.MuiModal-root[role='presentation']` |  3   | Limits search to the open dropdown, avoiding sidebar links. |
+| Customer menu item                 | `.MuiMenuItem-root`                                |  3   | Search items                                                |
+| Save button                        | `button[type="submit"]`                            |  1   | Standard form submit button.                                |
 
 ---
 
