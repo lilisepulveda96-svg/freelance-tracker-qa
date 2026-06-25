@@ -100,6 +100,39 @@ class ProjectsPage {
     cy.contains(this.#tableRows, projectName).should("contain", customerName);
     return this;
   }
+
+  createProjectWithoutCustomer(projectName, hourlyRate) {
+    this.openCreateForm();
+    cy.get(this.#nameInput).should("be.visible").type(projectName);
+    cy.get(this.#hourlyRate).should("be.visible").type(hourlyRate);
+    cy.get(this.#saveButton).should("be.visible").click();
+
+    cy.get(this.#notificationAlert, { timeout: 8000 }).should("be.visible");
+    cy.get(this.#notificationAlert, { timeout: 8000 }).should("not.exist");
+    return this;
+  }
+
+  openCustomerDropdown() {
+    this.openCreateForm();
+    cy.contains("label", "Customer")
+      .parent()
+      .find(this.#referenceInputCustomers)
+      .click();
+    return this;
+  }
+
+  assertCustomerInDropdown(customerName) {
+    cy.get(this.#customerDropdownMenu)
+      .should("be.visible")
+      .find(this.#customerMenuItem)
+      .should("have.length.greaterThan", 1);
+
+    cy.get(this.#customerDropdownMenu)
+      .contains(this.#customerMenuItem, customerName)
+      .should("be.visible");
+
+    return this;
+  }
 }
 
 export default new ProjectsPage();
