@@ -39,12 +39,15 @@ class CustomersPage {
   }
 
   clickEditForCustomer(customerName) {
+    cy.get("vercel-live-feedback").invoke("css", "display", "none");
+
     cy.contains(this.#tableRows, customerName).find(this.#editButton).click();
     return this;
   }
 
   clickDeleteForCustomer(customerName) {
     cy.intercept("DELETE", "**/customers/*").as("deleteCustomer");
+    cy.get("vercel-live-feedback").invoke("css", "display", "none");
     cy.contains(this.#tableRows, customerName).find(this.#deleteButton).click();
 
     cy.get(this.#notificationAlert, { timeout: 8000 }).should("be.visible");

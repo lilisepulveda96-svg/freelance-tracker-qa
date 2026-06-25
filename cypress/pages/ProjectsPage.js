@@ -53,6 +53,7 @@ class ProjectsPage {
   }
 
   clickEditForProject(projectName) {
+    cy.get("vercel-live-feedback").invoke("css", "display", "none");
     cy.contains(this.#tableRows, projectName).find(this.#editButton).click();
     return this;
   }
