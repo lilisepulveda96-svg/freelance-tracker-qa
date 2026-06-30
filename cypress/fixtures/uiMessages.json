@@ -3,5 +3,10 @@
   "formValidation": "The form is not valid. Please check for errors",
   "elementCreated": "Element created",
   "elementUpdated": "Element updated",
-  "elementDeleted": "Element deleted"
+  "elementDeleted": "Element deleted",
+  "kpiTitles": {
+    "hoursThisMonth": "Hours this month",
+    "projectedRevenue": "Projected revenue",
+    "totalClients": "Total clients"
+  }
 }
