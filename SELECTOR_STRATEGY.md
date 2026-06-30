@@ -95,10 +95,11 @@ The application does not implement `data-testid` attributes, and adding them is 
 
 **URL inspected:** `https://freelance-tracker-mvp-git-develop-lilibeth-sepulveda-s-projects.vercel.app/#/`
 
-| Element                   | Selector found                                 | Type | Notes                                                            |
-| ------------------------- | ---------------------------------------------- | :--: | ---------------------------------------------------------------- |
-| KPI card(s)               | `.MuiPaper-root .MuiCardContent-root p`        |  4   | Targets metrics text inside Material UI card components.         |
-| Chart container (`<svg>`) | `.MuiCardContent-root svg[role='application']` |  2   | Uses the accessible ARIA role to identify the main chart canvas. |
+| Element         | Selector found            | Type | Notes                                                                                                                                                                                                                                                                                                                                |
+| --------------- | ------------------------- | :--: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| KPI card(s)     | `.MuiCardContent-root`    |  3   | Scoped by KPI title text via `cy.contains()` to disambiguate between multiple cards — the selector alone matches all cards on the page. KPI title text verified via `h4` found inside the matched card. Replaced the previous `.MuiPaper-root .MuiCardContent-root p` which was too generic and required additional layered scoping. |
+| Chart container | `.recharts-wrapper`       |  3   | Wraps the full Recharts SVG canvas. More stable than the previous `svg[role='application']` approach, which relied on an ARIA role that Recharts does not consistently expose.                                                                                                                                                       |
+| Chart bar       | `.recharts-bar-rectangle` |  3   | Internal Recharts class used to assert that at least one bar renders. Not part of Recharts' public API — could change on a major library upgrade. Documented here as a known fragility risk.                                                                                                                                         |
 
 ---
 
